@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# AmneziaWG 2.0 Docker Client — Entrypoint Script
+# AmneziaWG 3.x Docker Client — Entrypoint Script
 # =============================================================================
 # Starts the AmneziaWG client in a Docker container.
 # awg-quick handles tunnel setup, routing, and its own kill-switch.
@@ -58,8 +58,8 @@ echo "=== AmneziaWG Client Config ==="
 echo "Config file: $CONFIG_FILE"
 echo "Interface section found: $(grep -c '^\[Interface\]' "$CONFIG_FILE")"
 echo "Peer section(s) found: $(grep -c '^\[Peer\]' "$CONFIG_FILE")"
-echo "AmneziaWG 2.0 params detected:"
-grep -E '^[ \t]*(Jc|Jmin|Jmax|S[1-4]|H[1-4]|I[1-5])[ \t]*=' "$CONFIG_FILE" || echo "  (none — using standard WireGuard or server defaults)"
+echo "AmneziaWG 3.x params detected:"
+grep -E '^[ \t]*(Jc|Jmin|Jmax|S[1-4]|H[1-4]|I[1-5]|HeaderProtectionKey|ContentPaddingAddition|MaxHandshakeAttempts|RekeyAfterTime|RekeyTimeout|RejectAfterTime|KeepaliveTimeout|RandomTrailers|DisableCookies|AdvancedSecurity)[ \t]*=' "$CONFIG_FILE" | sed -E 's/^([ \t]*HeaderProtectionKey[ \t]*=).*/\1 ***redacted***/' || echo "  (none — using standard WireGuard or server defaults)"
 echo "================================"
 
 # --- Graceful Shutdown Trap -----------------------------------------------
