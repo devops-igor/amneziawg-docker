@@ -1,10 +1,10 @@
 # =============================================================================
-# AmneziaWG 2.0 Client Configuration — Example
+# AmneziaWG 3.1 Client Configuration — Example
 # =============================================================================
 # Copy this file and fill in your values. Mount at:
 #   docker run -v /path/to/this/file:/config/amneziawg.conf:ro ...
 #
-# All AmneziaWG 2.0 obfuscation parameters are documented below.
+# All AmneziaWG 3.x obfuscation parameters are documented below.
 # These MUST match your server's configuration.
 # =============================================================================
 
@@ -21,7 +21,7 @@ Address = 10.0.0.2/32
 DNS = 1.1.1.1, 8.8.8.8
 
 # =============================================================================
-# AmneziaWG 2.0 Obfuscation Parameters
+# AmneziaWG 3.x Obfuscation Parameters
 # =============================================================================
 # These parameters provide deep packet inspection (DPI) evasion.
 # Both client and server MUST use identical values.
@@ -49,6 +49,40 @@ DNS = 1.1.1.1, 8.8.8.8
 # H2 = 2101520157
 # H3 = 1829552136
 # H4 = 2016351429
+
+# --- Header Protection (AWG 3.1) ---
+# Encrypts handshake/packet headers (ChaCha20). STRONG anti-DPI measure.
+# HeaderProtectionKey = <base64 key, generate with: awg genkey>
+#
+# CRITICAL constraints:
+#   * Key MUST be IDENTICAL on client and server — any mismatch means NO
+#     handshake, with NO error message (tunnel silently never comes up).
+#   * Requires S1, S2, S3, S4 to ALL be >= 12 when HP is enabled.
+#   * Server must run AWG 3.1. Verify server-side representation of the key
+#     (some server stacks expect the same 32-byte key in hex form).
+
+# --- Advanced 3.1 parameters (optional — server defaults apply when unset) ---
+# Extra padding (bytes) added to data packets, on top of S1-S4
+# ContentPaddingAddition = 0
+# Max number of handshake attempts before giving up
+# MaxHandshakeAttempts = 5
+# Seconds of session lifetime after which a rekey is initiated
+# RekeyAfterTime = 120
+# Seconds to wait between handshake retry attempts
+# RekeyTimeout = 5
+# Seconds after which a session key is rejected (hard session limit)
+# RejectAfterTime = 180
+# Seconds of inactivity before a keepalive is sent
+# KeepaliveTimeout = 10
+# Append random-length trailers to packets: on|off
+# RandomTrailers = on
+# Disable cookie replies under load: on|off
+# DisableCookies = off
+# Enable advanced security mode: on|off — NOTE: accepted by awg-quick, but the
+# userspace amneziawg-go daemon v3.1.20260828 currently has no UAPI support
+# for it; it is kernel-module/server-side — client configs may silently
+# ignore it
+# AdvancedSecurity = off
 
 # --- CPS Signature Packets (I1, I2, I3, I4, I5) ---
 # Custom Protocol Signature — defines obfuscation protocol
