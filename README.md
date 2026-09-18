@@ -133,8 +133,8 @@ services:
 
 ```bash
 # Clone the repo
-git clone https://github.com/devops-igor/amneziawg2-docker-arm64.git
-cd amneziawg2-docker-arm64
+git clone https://github.com/devops-igor/amneziawg-docker.git
+cd amneziawg-docker
 
 # Build for your current architecture
 docker build -t amneziawg-client:local .
@@ -142,10 +142,10 @@ docker build -t amneziawg-client:local .
 # Or build for arm64 explicitly
 docker buildx build --platform linux/arm64 -t amneziawg-client:local .
 
-# Override version pins (defaults: v0.2.16, v1.0.20260223)
+# Override version pins (defaults: v3.1.20260828, v3.1.20260812)
 docker buildx build --platform linux/arm64 \
-  --build-arg AWG_GO_VERSION=v0.2.16 \
-  --build-arg AWG_TOOLS_VERSION=v1.0.20260223 \
+  --build-arg AWG_GO_VERSION=v3.1.20260828 \
+  --build-arg AWG_TOOLS_VERSION=v3.1.20260812 \
   -t amneziawg-client:local .
 ```
 
