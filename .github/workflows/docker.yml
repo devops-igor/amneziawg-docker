@@ -38,6 +38,7 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
+          provenance: false
           outputs: type=image,name=devopsigor/amneziawg,push-by-digest=true,name-canonical=true
 
       - name: Export digest
