@@ -1,6 +1,11 @@
 name: docker
 
 on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -78,8 +83,12 @@ jobs:
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         run: |
-          docker buildx imagetools create -t devopsigor/amneziawg:ci-test \
+          TAGS="-t devopsigor/amneziawg:latest"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TAGS="$TAGS -t devopsigor/amneziawg:${GITHUB_REF#refs/tags/}"
+          fi
+          docker buildx imagetools create $TAGS \
             $(printf 'devopsigor/amneziawg@sha256:%s ' *)
 
       - name: Inspect image
-        run: docker buildx imagetools inspect devopsigor/amneziawg:ci-test
+        run: docker buildx imagetools inspect devopsigor/amneziawg:latest
