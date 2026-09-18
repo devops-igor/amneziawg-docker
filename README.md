@@ -8,8 +8,6 @@
 
 > Lightweight Docker image for running AmneziaWG 3.1 VPN on ARM64 and x86_64 devices
 
-> Image home moved to [devopsigor/amneziawg](https://hub.docker.com/r/devopsigor/amneziawg) (multi-arch). The old devopsigor/awg2-arm64 image is frozen at its last arm64-only version.
-
 ---
 
 ## Table of Contents
