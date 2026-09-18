@@ -1,17 +1,21 @@
 # AmneziaWG 3.1 Docker Client
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/devopsigor/awg2-arm64)](https://hub.docker.com/r/devopsigor/awg2-arm64)
+[![docker](https://github.com/devops-igor/amneziawg-docker/actions/workflows/docker.yml/badge.svg)](https://github.com/devops-igor/amneziawg-docker/actions/workflows/docker.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/devopsigor/amneziawg)](https://hub.docker.com/r/devopsigor/amneziawg)
 [![License](https://img.shields.io/github/license/devops-igor/amneziawg-docker)](LICENSE)
-[![Docker Image Size](https://img.shields.io/docker/image-size/devopsigor/awg2-arm64/latest)](https://hub.docker.com/r/devopsigor/awg2-arm64)
-[![Platform](https://img.shields.io/badge/platform-linux%2Farm64-blue)]()
+[![Docker Image Size](https://img.shields.io/docker/image-size/devopsigor/amneziawg/latest)](https://hub.docker.com/r/devopsigor/amneziawg)
+[![Platform](https://img.shields.io/badge/platform-linux%2Farm64%20%7C%20linux%2Famd64-blue)]()
 
-> Lightweight Docker image for running AmneziaWG 3.1 VPN on ARM64 devices
+> Lightweight Docker image for running AmneziaWG 3.1 VPN on ARM64 and x86_64 devices
+
+> Image home moved to [devopsigor/amneziawg](https://hub.docker.com/r/devopsigor/amneziawg) (multi-arch). The old devopsigor/awg2-arm64 image is frozen at its last arm64-only version.
 
 ---
 
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [Pull](#pull)
 - [Volume Mount](#volume-mount)
 - [Required Capabilities & Sysctls](#required-capabilities--sysctls)
 - [Healthcheck](#healthcheck)
@@ -24,7 +28,7 @@
 
 ---
 
-A minimal Docker image that runs [AmneziaWG 3.1](https://github.com/amnezia-vpn/amneziawg-go) client using the userspace `amneziawg-go` implementation. No kernel module required - works on Raspberry Pi, ARM servers, NAS devices, and anywhere Docker runs.
+A minimal Docker image that runs [AmneziaWG 3.1](https://github.com/amnezia-vpn/amneziawg-go) client using the userspace `amneziawg-go` implementation. No kernel module required - works on Raspberry Pi, ARM servers, x86 servers, NAS devices, and anywhere Docker runs.
 
 ---
 
@@ -39,8 +43,25 @@ docker run \
   --sysctl net.ipv4.ip_forward=1 \
   --sysctl net.ipv4.conf.all.src_valid_mark=1 \
   -v /path/to/your/amneziawg.conf:/config/amneziawg.conf:ro \
-  devopsigor/awg2-arm64:latest
+  devopsigor/amneziawg:latest
 ```
+
+---
+
+## Pull
+
+```bash
+docker pull devopsigor/amneziawg:latest            # native arch of your host
+docker pull --platform linux/amd64 devopsigor/amneziawg:latest
+docker pull --platform linux/arm64 devopsigor/amneziawg:latest
+```
+
+Versioned tags are published automatically on every `v*` git tag (e.g. `v3.1.20260828-1`).
+
+### Platform support
+
+- **linux/arm64** — primary target, fully tested (live tunnel verification with header protection)
+- **linux/amd64** — built by the same CI pipeline from identical source; verified at artifact level (correct platform manifest, x86-64 binaries). Recommended: run a quick smoke on your x86 host before production use.
 
 ---
 
@@ -108,7 +129,7 @@ See [`config/amneziawg.conf.example`](config/amneziawg.conf.example) for a fully
 ```yaml
 services:
   amneziawg:
-    image: devopsigor/awg2-arm64:latest 
+    image: devopsigor/amneziawg:latest 
     container_name: amneziawg-client
     cap_add:
       - NET_ADMIN
@@ -131,10 +152,11 @@ services:
 
 ## Build from Source
 
+GitHub Actions builds both architectures on native runners and publishes to Docker Hub automatically on every push to `main` (and on `v*` tags). Local builds are only needed for custom patches or testing.
+
 ### Prerequisites
 
-- Docker 20.10+
-- `docker buildx` with `linux/arm64` platform support
+- Docker 20.10+ with buildx
 
 ### Build
 
@@ -146,21 +168,32 @@ cd amneziawg-docker
 # Build for your current architecture
 docker build -t amneziawg-client:local .
 
-# Or build for arm64 explicitly
+# Or build for a specific platform explicitly
+docker buildx build --platform linux/amd64 -t amneziawg-client:local .
 docker buildx build --platform linux/arm64 -t amneziawg-client:local .
 
 # Override version pins (defaults: v3.1.20260828, v3.1.20260812)
-docker buildx build --platform linux/arm64 \
+docker buildx build \
   --build-arg AWG_GO_VERSION=v3.1.20260828 \
   --build-arg AWG_TOOLS_VERSION=v3.1.20260812 \
   -t amneziawg-client:local .
 ```
 
-### Build Command That Worked
+### Local multi-arch build (optional)
 
+CI handles multi-arch automatically; to reproduce it locally:
+
+```bash
+# One-time: enable cross-arch emulation and a container-driver builder
+docker run --privileged --rm tonistiigi/binfmt --install amd64
+docker buildx create --name multiarch --driver docker-container --use
+
+# Build and push both architectures as a single manifest
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t <your-dockerhub-user>/<your-repo>:tag --push .
 ```
-docker buildx build --platform linux/arm64 -t amneziawg-client:local .
-```
+
+Pushing requires registry authentication (`docker login`). CI does this with repository secrets.
 
 ### Verify Build
 
