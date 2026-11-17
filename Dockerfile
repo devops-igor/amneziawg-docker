@@ -10,7 +10,7 @@ ARG BUILDARCH
 ARG GOARM
 
 # Version pinning — override at build time without editing Dockerfile
-ARG AWG_GO_VERSION=v3.1.20260828
+ARG AWG_GO_VERSION=v3.1.20261116
 ARG AWG_TOOLS_VERSION=v3.1.20260812
 
 # Install build dependencies
@@ -34,7 +34,9 @@ WORKDIR /build
 RUN git clone --depth 1 --branch ${AWG_GO_VERSION} https://github.com/amnezia-vpn/amneziawg-go.git
 
 WORKDIR /build/amneziawg-go
-RUN go build -ldflags="-s -w" -o amneziawg-go .
+# Build through the upstream Makefile so version.go is generated from the
+# checked-out tag (a plain `go build` would embed the stale committed value).
+RUN GOFLAGS="-ldflags=-s -w" make
 
 # Clone and build amneziawg-tools (plain Makefile, no configure script)
 WORKDIR /build
