@@ -32,7 +32,7 @@ DNS = 1.1.1.1, 8.8.8.8
 # Jc = 4
 # Minimum junk packet size (bytes)
 # Jmin = 50
-# Maximum junk packet size (bytes)
+# Maximum junk packet size (bytes) — must be >= Jmin
 # Jmax = 1000
 
 # --- Packet Padding (S1, S2, S3, S4) ---
@@ -62,7 +62,8 @@ DNS = 1.1.1.1, 8.8.8.8
 #     (some server stacks expect the same 32-byte key in hex form).
 
 # --- Advanced 3.1 parameters (optional — server defaults apply when unset) ---
-# Extra padding (bytes) added to data packets, on top of S1-S4
+# Extra padding (bytes) added to data packets. When set, it takes priority for
+# transport packets, so RandomTrailers then applies only to handshakes.
 # ContentPaddingAddition = 0
 # Max number of handshake attempts before giving up
 # MaxHandshakeAttempts = 5
@@ -75,14 +76,12 @@ DNS = 1.1.1.1, 8.8.8.8
 # Seconds of inactivity before a keepalive is sent
 # KeepaliveTimeout = 10
 # Append random-length trailers to packets: on|off
+# Must be enabled on BOTH sides — the receiver only accepts the random trailer
+# on handshake packets when RandomTrailers is on there too.
 # RandomTrailers = on
 # Disable cookie replies under load: on|off
+# This also disables handshake rate limiting, reducing flood protection.
 # DisableCookies = off
-# Enable advanced security mode: on|off — NOTE: accepted by awg-quick, but the
-# userspace amneziawg-go daemon v3.1.20260828 currently has no UAPI support
-# for it; it is kernel-module/server-side — client configs may silently
-# ignore it
-# AdvancedSecurity = off
 
 # --- CPS Signature Packets (I1, I2, I3, I4, I5) ---
 # Custom Protocol Signature — defines obfuscation protocol
@@ -114,3 +113,9 @@ AllowedIPs = 0.0.0.0/0
 # Optional: keep connection alive (seconds)
 # Needed for NATted connections — 25 is common
 PersistentKeepalive = 25
+
+# Optional: peer-level advanced security mode (kernel-module peers only).
+# The userspace amneziawg-go daemon v3.1.20261116 has no UAPI support for this
+# flag; setting this line at all (even to `off`) makes `awg setconf` fail with
+# "Invalid argument", so leave it commented out for this image.
+# AdvancedSecurity = off

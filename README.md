@@ -54,7 +54,7 @@ docker pull --platform linux/amd64 devopsigor/amneziawg:latest
 docker pull --platform linux/arm64 devopsigor/amneziawg:latest
 ```
 
-Versioned tags are published automatically on every `v*` git tag (e.g. `v3.1.20260828-1`).
+Versioned tags are published automatically on every `v*` git tag (e.g. `v3.1.20261116-1`).
 
 ### Platform support
 
@@ -170,9 +170,9 @@ docker build -t amneziawg-client:local .
 docker buildx build --platform linux/amd64 -t amneziawg-client:local .
 docker buildx build --platform linux/arm64 -t amneziawg-client:local .
 
-# Override version pins (defaults: v3.1.20260828, v3.1.20260812)
+# Override version pins (defaults: v3.1.20261116, v3.1.20260812)
 docker buildx build \
-  --build-arg AWG_GO_VERSION=v3.1.20260828 \
+  --build-arg AWG_GO_VERSION=v3.1.20261116 \
   --build-arg AWG_TOOLS_VERSION=v3.1.20260812 \
   -t amneziawg-client:local .
 ```

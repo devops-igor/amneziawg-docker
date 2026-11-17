@@ -63,8 +63,12 @@ grep -E '^[ \t]*(Jc|Jmin|Jmax|S[1-4]|H[1-4]|I[1-5]|HeaderProtectionKey|ContentPa
 echo "================================"
 
 # --- Graceful Shutdown Trap -----------------------------------------------
+IDLE_PID=""
 cleanup() {
     echo "Caught SIGTERM/SIGINT — shutting down AmneziaWG..."
+    if [ -n "$IDLE_PID" ]; then
+        kill "$IDLE_PID" 2>/dev/null || true
+    fi
     awg-quick down "$CONFIG_FILE" 2>/dev/null || true
     echo "Shutdown complete."
     exit 0
@@ -100,9 +104,14 @@ fi
 echo "AmneziaWG interface is up. Kill-switch is handled by awg-quick."
 echo "Container staying alive — logs follow."
 
-# Drop privileges for the long-running process if running as root
+# Drop privileges for the long-running process if running as root.
+# Keep this shell as PID 1 so the SIGTERM/SIGINT trap stays installed; run the
+# idle process as a child and wait on it instead of exec'ing it.
 if [ "$(id -u)" -eq 0 ] && id amneziawg >/dev/null 2>&1; then
-    exec su -s /bin/bash amneziawg -c "exec tail -f /dev/null"
+    su -s /bin/bash amneziawg -c "exec tail -f /dev/null" &
 else
-    exec tail -f /dev/null
+    tail -f /dev/null &
 fi
+IDLE_PID=$!
+
+wait "$IDLE_PID"

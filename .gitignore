@@ -1,3 +1,4 @@
 .env.example
 DEV_HANDOVER.md
 QA_REVIEW.md
+tasks/
